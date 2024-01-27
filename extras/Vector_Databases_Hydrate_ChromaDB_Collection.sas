@@ -25,15 +25,15 @@
    Note that Python code is pasted as-is and may be out of line with the SAS indentation followed.
 
 *------------------------------------------------------------------------------------------*/
-   filename hcdccode temp;
+filename hcdccode temp;
 
-   data abc;
+data abc;
 
-      infile datalines4 truncover pad;
-      input ;   
-      file hcdccode;
-      put @1 _infile_;
-      datalines4;
+   infile datalines4 truncover pad;
+   input ;   
+   file hcdccode;
+   put @1 _infile_;
+   datalines4;
 
 #############################################################################################
 #
