@@ -67,6 +67,7 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 4. Embedding pattern (text column, required):  document embeddings tend to be long series involving 100s or sometimes 1000s of columns.  To avoid having to select them individually, provide a text pattern which applies to all embedding column names. For example,  Col_ represents Col_1, Col_2..... Col_n.
 
 5. Metadata column (optional, column selector, maximum 1): select a column which contains additional metadata (for example, a category, sentiment or star rating) which is also ingested into the vector database collection.
+
 ----
 ### Configuration 
 
@@ -75,12 +76,14 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 2. CAS server (text field, default entered): change this only if you need a CAS server name different from a typical Viya 4 installation.
 
 3. CAS port (numeric field, default entered): change this only if you know that the CAS server runs on a different port than the default.
+
 ----
 ### Output Specifications
 
 - Name of collection (text column, required): provide a name for your collection.  A vector database collection can be viewed as similar to a table in a relational database.
 
 Upon successful completion, an informational message is written to the log indicating number of records loaded.
+
 ----
 ## Run-time Control
 
