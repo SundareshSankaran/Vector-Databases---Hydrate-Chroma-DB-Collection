@@ -8,6 +8,21 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 
 ## User Interface
 
+----
+## Table of Contents
+1. [Assumptions](#assumptions)
+2. [Requirements](#requirements)
+3. [Parameters](#parameters)
+   1. [Input Parameters](#input-parameters)
+   2. [Configuration](#configuration)
+   3. [Output Specifications](#output-specifications)
+4. [Run-time Control](#run-time-control)
+5. [Documentation](#documentation)
+6. [SAS Program](#sas-program)
+7. [Installation and Usage](#installation--usage)
+8. [Created/Contact](#createdcontact)
+9. [Change Log](#change-log)
+----
 ## Assumptions
 
 1.  For this initial version, your input data requires a text variable, a set of document embeddings (columns) and optionally, an additional categorical variable for metadata.  We plan to accommodate additional variables in future versions.
@@ -38,8 +53,9 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 
 4. Optional components, based on site-specific architecture, are to have a separate Chroma DB server for persistence and scale.  Refer [Chroma documentation](https://docs.trychroma.com/usage-guide) for details.
 
+----
 ## Parameters
-
+----
 ### Input Parameters
 
 1. Input table containing a text column (input port, required): attach a CAS table to this port.
@@ -51,7 +67,7 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 4. Embedding pattern (text column, required):  document embeddings tend to be long series involving 100s or sometimes 1000s of columns.  To avoid having to select them individually, provide a text pattern which applies to all embedding column names. For example,  Col_ represents Col_1, Col_2..... Col_n.
 
 5. Metadata column (optional, column selector, maximum 1): select a column which contains additional metadata (for example, a category, sentiment or star rating) which is also ingested into the vector database collection.
-
+----
 ### Configuration 
 
 1. Location for Chroma database (folder selector, required): select a location to persist the Chroma database.  Note this needs to be on the filesystem (SAS Server) and not SAS Content.  In case no value is provided, the path defaults to /tmp.  Note that /tmp gets cleared upon termination of the SAS compute session. 
@@ -59,13 +75,13 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 2. CAS server (text field, default entered): change this only if you need a CAS server name different from a typical Viya 4 installation.
 
 3. CAS port (numeric field, default entered): change this only if you know that the CAS server runs on a different port than the default.
-
+----
 ### Output Specifications
 
 - Name of collection (text column, required): provide a name for your collection.  A vector database collection can be viewed as similar to a table in a relational database.
 
 Upon successful completion, an informational message is written to the log indicating number of records loaded.
-
+----
 ## Run-time Control
 
 Note: Run-time control is optional.  You may choose whether to execute the main code of this step or not, based on upstream conditions set by earlier SAS programs.  This includes nodes run prior to this custom step earlier in a SAS Studio Flow, or a previous program in the same session.
@@ -97,7 +113,7 @@ To "enable" this step again, run the following (it's assumed that this has alrea
 
 IMPORTANT: Be aware that disabling this step means that none of its main execution code will run, and any  downstream code which was dependent on this code may fail.  Change this setting only if it aligns with the objective of your SAS Studio program.
 
-
+----
 ## Documentation
 
 1. Documentation for the [chromadb Python package and Chroma DB](https://docs.trychroma.com)
@@ -113,20 +129,20 @@ IMPORTANT: Be aware that disabling this step means that none of its main executi
 6.  Every custom step is a learning opportunity for SAS programming!  I revisited the venerable but still powerful DATALINES ([DATALINES4](https://go.documentation.sas.com/doc/en/pgmsascdc/default/lestmtsref/p1mm9b070wj962n16q0v1d9uku5q.htm)) statement and it proved helpful in negotiating a design challenge in the SAS program. 
 
 7. [Details on the optional run-time trigger control](https://communities.sas.com/t5/SAS-Communities-Library/Switch-on-switch-off-run-time-control-of-SAS-Studio-Custom-Steps/ta-p/885526)
-
+----
 ## SAS Program
 
 Refer [here](./extras/Vector_Databases_Hydrate_ChromaDB_Collection.sas) for the SAS program used by the step.  You'd find this useful for situations where you wish to execute this step through non-SAS Studio Custom Step interfaces such as the [SAS Extension for Visual Studio Code](https://github.com/sassoftware/vscode-sas-extension), with minor modifications. 
-
+----
 ## Installation & Usage
 
 - Refer to the [steps listed here](https://github.com/sassoftware/sas-studio-custom-steps#getting-started---making-a-custom-step-from-this-repository-available-in-sas-studio).
 
-
+----
 ## Created/contact: 
 
 - Sundaresh Sankaran (sundaresh.sankaran@sas.com)
-
+----
 ## Change Log
 
 * Version 1.0 (24JAN2024) 
