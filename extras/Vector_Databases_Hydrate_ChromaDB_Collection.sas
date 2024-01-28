@@ -68,7 +68,7 @@ os.environ['CAS_CLIENT_SSL_CA_LIST']=os.environ['SSLCALISTLOC']
 SAS.logMessage("Session UUID is {}".format(sessuuid))   
 conn            =  swat.CAS(hostname=cas_host_path,port=cas_host_port, password=os.environ['SAS_SERVICES_TOKEN'],session=sessuuid)
 
-SAS.logMessage("Connection made.)   
+SAS.logMessage("Connection made.")   
 
 #############################################################################################
 #
@@ -107,7 +107,7 @@ scoredTable = conn.CASTable(name=input_table, caslib=input_table_lib)
 #
 #############################################################################################
 
-embedding_pattern = SAS.symget(embeddingPattern)
+embedding_pattern = SAS.symget("embeddingPattern")
 
 import pandas
 df = pandas.DataFrame()
