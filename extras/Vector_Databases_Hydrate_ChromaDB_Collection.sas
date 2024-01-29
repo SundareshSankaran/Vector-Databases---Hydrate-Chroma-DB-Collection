@@ -10,6 +10,27 @@
    https://github.com/SundareshSankaran/Vector-Databases---Hydrate-Chroma-DB-Collection
 *------------------------------------------------------------------------------------------ */
 
+cas ss;
+caslib _ALL_ assign;
+
+
+/*-----------------------------------------------------------------------------------------*
+   Values provided are for illustrative purposes only.
+   Provide your own values in the section below.  
+*------------------------------------------------------------------------------------------*/
+%let inputTable=PUBLIC.Topics_20240123;
+%let inputTable_lib=PUBLIC;
+%let casHostPath=sas-cas-server-default-client;
+%let casHostPort=5570;
+%let persistentPath=sasserver:/tmp;
+%let collectionName=new_collection;
+%let embeddingPattern=_Col;
+%let docId=__unique_id_;
+%let textVar=Text_Review;
+%let metadataColumn=Target_Rating;
+
+
+
 /*-----------------------------------------------------------------------------------------*
    Python Block Definition
 *------------------------------------------------------------------------------------------*/
@@ -27,7 +48,7 @@
 *------------------------------------------------------------------------------------------*/
 filename hcdccode temp;
 
-data abc;
+data _null_;
 
    infile datalines4 truncover pad;
    input ;   
@@ -62,13 +83,23 @@ cas_host_port      =  SAS.symget("casHostPort")
 #  About tab - Documentation 
 #
 #############################################################################################
-
-import swat, os
+import os
+import swat
 os.environ['CAS_CLIENT_SSL_CA_LIST']=os.environ['SSLCALISTLOC']
 SAS.logMessage("Session UUID is {}".format(sessuuid))   
 conn            =  swat.CAS(hostname=cas_host_path,port=cas_host_port, password=os.environ['SAS_SERVICES_TOKEN'],session=sessuuid)
 
-SAS.logMessage("Connection made.")   
+SAS.logMessage("Connection to CAS suceeded.")   
+
+#############################################################################################
+#
+#  Refer https://docs.trychroma.com/telemetry for details.  Recommend to opt out of anonymized 
+#  unless you can confidently configure permissions on the Python build location (admin-level).
+#
+#############################################################################################
+
+os.environ['ANONYMIZED_TELEMETRY'] = "False"
+
 
 #############################################################################################
 #
@@ -78,19 +109,34 @@ SAS.logMessage("Connection made.")
 
 import chromadb
 
-chroma_client = chromadb.Client()
+#############################################################################################
+#
+#  Obtain path from UI (you didn't look at the Configuration page, did you? ;)..)
+#
+#############################################################################################
 
-print(chroma_client.heartbeat())
+persistent_path = SAS.symget("persistentPath")
+
+#############################################################################################
+#
+#  Connect to a Chroma server (refer About for notes about this delineation)
+#
+#############################################################################################
+
+chroma_client = chromadb.PersistentClient(path=persistent_path)
+
+SAS.logMessage("Chroma client alive at: {}".format(chroma_client.heartbeat()))
 
 collection_name      =  SAS.symget("collectionName")
 
 collection = chroma_client.get_or_create_collection(name=collection_name)
 
-SAS.logMessage("Collection created: {}".format(collection.count()))
+SAS.logMessage("Collection created: {} documents at present".format(collection.count()))
 
 #############################################################################################
 #
-#  Import chromadb
+#  Obtain values and prepare data from UI.  (Leaving a commented line which is an interesting
+#  alternative way to vectorize (geez.. make a list of ;)) a set of columns)
 #
 #############################################################################################
 
@@ -122,9 +168,9 @@ df['Embeddings'] = (
 #
 #############################################################################################
 
-document_id = SAS.symget(docId)
-text_variable = SAS.symget(textVar)
-metadata_column = SAS.symget(metadataColumn)
+document_id = SAS.symget("docId")
+text_variable = SAS.symget("textVar")
+metadata_column = SAS.symget("metadataColumn")
 
 if metadata_column:
 
@@ -132,7 +178,7 @@ if metadata_column:
       ids=[str(i) for i in scoredTable[document_id]],  
       documents=[doc for doc in scoredTable[text_variable]],
       embeddings=[embedding for embedding in df["Embeddings"]],
-      metadatas=[{"rating": target} for target in scoredTable["Target_Rating"]],
+      metadatas=[{"rating": target} for target in scoredTable[metadata_column]],
    )
 
 else:
@@ -327,6 +373,48 @@ run;
 
   %mend _env_check_python;
 
+/* -----------------------------------------------------------------------------------------* 
+   Macro to identify whether a given folder location provided from a 
+   SAS Studio Custom Step folder selector happens to be a SAS Content folder
+   or a folder on the filesystem (SAS Server).
+
+   Input:
+   1. pathReference: A path reference provided by the file or folder selector control in 
+      a SAS Studio Custom step.
+
+   Output:
+   1. _path_identifier: Set inside macro, a global variable indicating the prefix of the 
+      path provided.
+
+   Also available at: https://raw.githubusercontent.com/SundareshSankaran/sas_utility_programs/main/code/Identify%20SAS%20Content%20or%20Server/macro_identify_sas_content_server.sas
+
+*------------------------------------------------------------------------------------------ */
+%macro _identify_content_or_server(pathReference);
+   %global _path_identifier;
+   data _null_;
+      call symput("_path_identifier", scan("&pathReference.",1,":","MO"));
+   run;
+%mend _identify_content_or_server;
+
+/* -----------------------------------------------------------------------------------------* 
+   Macro to extract the path provided from a SAS Studio Custom Step file or folder selector.
+
+   Input:
+   1. pathReference: A path reference provided by the file or folder selector control in 
+      a SAS Studio Custom step.
+
+   Output:
+   1. _sas_folder_path: Set inside macro, a global variable containing the path.
+
+   Also available at: https://raw.githubusercontent.com/SundareshSankaran/sas_utility_programs/main/code/Extract%20SAS%20Folder%20Path/macro_extract_sas_folder_path.sas
+
+*------------------------------------------------------------------------------------------ */
+%macro _extract_sas_folder_path(pathReference);
+   %global _sas_folder_path;
+   data _null_;
+      call symput("_sas_folder_path", scan("&pathReference.",2,":","MO"));
+   run;
+%mend _extract_sas_folder_path;
 
 /*-----------------------------------------------------------------------------------------*
    EXECUTION CODE MACRO 
@@ -377,6 +465,37 @@ run;
 
    %end;
 
+/*-----------------------------------------------------------------------------------------*
+   Check if path provided happens to be a filesystem (SAS Server) or SAS Content path. 
+   Prior to that, insert /tmp as a placeholder in case this field has not been entered.
+*------------------------------------------------------------------------------------------*/
+
+   %if &_hcdc_error_flag. = 0 %then %do;
+
+      %if "&persistentPathName."="" %then %do;
+         %let persistentPathName=sasserver:/tmp;
+      %end;
+      %else %do;
+         %_identify_content_or_server(&persistentPathName.);
+         %if "&_path_identifier."="sasserver" %then %do;
+            %put NOTE: Folder location prefixed with &_path_identifier. is on the SAS Server.;
+         %end;
+         %else %do;
+            %let _hcdc_error_flag=1;
+            %put ERROR: Please select a valid folder on the SAS Server for persisting the database. ;
+         %end;
+      %end;
+
+   %end;
+
+/*-----------------------------------------------------------------------------------------*
+   Extract path from the UI macro variable provided.
+*------------------------------------------------------------------------------------------*/
+   %if &_hcdc_error_flag. = 0 %then %do;
+      %_extract_sas_folder_path(&persistentPathName.);
+      %let persistentPath = &_sas_folder_path.;
+      %let _sas_folder_path=;
+   %end;
 /*-----------------------------------------------------------------------------------------*
    Run Python block (accepts inputs and loads documents along with embeddings)
 *------------------------------------------------------------------------------------------*/
@@ -442,8 +561,12 @@ run;
    %symdel _current_uuid_;
 %end;
 
-%if %symexist(_current_uuid_) %then %do;
-   %symdel _current_uuid_;
+%if %symexist(_sas_folder_path) %then %do;
+   %symdel _sas_folder_path;
+%end;
+
+%if %symexist(_path_identifier) %then %do;
+   %symdel _path_identifier;
 %end;
 
 %if %symexist(_hcdc_run_trigger) %then %do;
@@ -458,6 +581,8 @@ run;
 %sysmacdelete _env_check_python;
 %sysmacdelete _usr_getNameCaslib;
 %sysmacdelete _env_cas_checkSession;
+%sysmacdelete _extract_sas_folder_path;
+%sysmacdelete _identify_content_or_server;
 %sysmacdelete _create_runtime_trigger;
 %sysmacdelete _create_error_flag;
 
