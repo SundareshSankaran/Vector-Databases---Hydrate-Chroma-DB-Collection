@@ -49,11 +49,11 @@ Here's a quick overview video (click on the image below):
 
 2. Python packages to be installed:
 
-   i.   [chromadb](https://pypi.org/project/chromadb/)
-   ii.  [pysqlite-binary](https://pypi.org/project/pysqlite-binary/)
-   iii. [pandas](https://pypi.org/project/pandas/)
-   iv.  [swat](https://pypi.org/project/swat/)
-   v.   [transformers(optional) ](https://pypi.org/project/transformers/)
+   1. [chromadb](https://pypi.org/project/chromadb/)
+   2. [pysqlite-binary](https://pypi.org/project/pysqlite-binary/)
+   3. [pandas](https://pypi.org/project/pandas/)
+   4. [swat](https://pypi.org/project/swat/)
+   5. [transformers(optional) ](https://pypi.org/project/transformers/)
 
 3. Suggested Python version is [3.10.x](https://www.python.org/downloads/release/python-3100/) due to dependency on [sqlite version >= 3.35.0](https://docs.trychroma.com/troubleshooting#sqlite) (refer documentation).  However, a workaround suggested by Chroma has been followed in the code.
 
