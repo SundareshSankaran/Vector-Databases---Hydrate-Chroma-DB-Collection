@@ -8,6 +8,10 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 
 ## User Interface
 
+Here's a quick overview video (click on the image below):
+
+[![Vector Databases - Hydrate Chroma DB Collection](./img/Vector_Databases_Hydrate_Chroma_DB_Collection.png)](https://www.youtube.com/watch?v=mX5IxT_JRHc)
+
 ----
 ## Table of Contents
 1. [Assumptions](#assumptions)
@@ -33,7 +37,9 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 
 4.  This custom step runs on data loaded to a SAS Cloud Analytics Services (CAS) library (known as a caslib). Ensure you are connected to CAS before running this step. 
 
-5. [Proc Python](https://communities.sas.com/t5/SAS-Communities-Library/Using-PROC-PYTHON-to-augment-your-SAS-programs/ta-p/812397) is required.  Details on Python packages in prerequisites section below.  Also, consider build and install of  Python and required packages through the SAS Configurator for Open Source
+5. [Proc Python](https://communities.sas.com/t5/SAS-Communities-Library/Using-PROC-PYTHON-to-augment-your-SAS-programs/ta-p/812397) is required.  Details on Python packages in prerequisites section below.  Also, consider build and install of  Python and required packages through the SAS Configurator for Open Source.
+
+6. Many vector databases (Chroma included), can auto-generate embeddings on ingested text data (documents), using either proprietary or open-source embedding models.  This custom step highlights the integration of SAS Viya-generated embeddings (from VTA / VDMML) with vector databases and therefore requires embeddings to be provided as part of input data.  A future version will examine how to auto-generate embeddings through the step. 
 
 -----
 
@@ -52,6 +58,8 @@ Vector databases facilitate many Generative AI applications, particularly in pro
 3. Suggested Python version is [3.10.x](https://www.python.org/downloads/release/python-3100/) due to dependency on [sqlite version >= 3.35.0](https://docs.trychroma.com/troubleshooting#sqlite) (refer documentation).  However, a workaround suggested by Chroma has been followed in the code.
 
 4. Optional components, based on site-specific architecture, are to have a separate Chroma DB server for persistence and scale.  Refer [Chroma documentation](https://docs.trychroma.com/usage-guide) for details.
+
+
 
 ----
 ## Parameters
@@ -132,6 +140,9 @@ IMPORTANT: Be aware that disabling this step means that none of its main executi
 6.  Every custom step is a learning opportunity for SAS programming!  I revisited the venerable but still powerful DATALINES ([DATALINES4](https://go.documentation.sas.com/doc/en/pgmsascdc/default/lestmtsref/p1mm9b070wj962n16q0v1d9uku5q.htm)) statement and it proved helpful in negotiating a design challenge in the SAS program. 
 
 7. [Details on the optional run-time trigger control](https://communities.sas.com/t5/SAS-Communities-Library/Switch-on-switch-off-run-time-control-of-SAS-Studio-Custom-Steps/ta-p/885526)
+
+8. [SAS Communities article](https://communities.sas.com/t5/SAS-Communities-Library/Hotwire-your-SWAT-inside-SAS-Studio/ta-p/835956) on connecting to CAS using the SWAT package in SAS Studio
+
 ----
 ## SAS Program
 
